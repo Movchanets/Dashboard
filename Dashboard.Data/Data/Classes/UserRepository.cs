@@ -1,4 +1,5 @@
-﻿using Dashboard.Data.Data.Interfaces;
+﻿using AutoMapper;
+using Dashboard.Data.Data.Interfaces;
 using Dashboard.Data.Data.Models;
 using Dashboard.Data.Data.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -10,9 +11,11 @@ namespace Dashboard.Data.Data.Classes
     public class UserRepository : IUserRepository
     {
         private readonly UserManager<AppUser> _userManager;
-        public UserRepository(UserManager<AppUser> userManager)
+        private readonly IMapper _mapper;
+        public UserRepository(UserManager<AppUser> userManager, IMapper mapper)
         {
             _userManager = userManager;
+            _mapper = mapper;
         }
 
         public async Task<string> GenerateEmailConfirmationTokenAsync(AppUser model)
@@ -86,19 +89,20 @@ namespace Dashboard.Data.Data.Classes
 
         public List<UserVM> GetAllUsers()
         {
-            var users = _userManager.Users.ToList();
-            List<UserVM> result = new List<UserVM>();
-            foreach (var user in users)
-            {
-                result.Add(new UserVM
-                {
-                    Email = user.Email,
-                    UserName = user.UserName,
-                    EmailConfirmed = user.EmailConfirmed,
-                    Name = user.Name,
-                    Surname = user.Surname
-                });
-            };
+            List<AppUser>? users = _userManager.Users.ToList();
+            List<UserVM>? result = _mapper.Map < List < AppUser >, List<UserVM>> (users);
+            //List<UserVM> result = new List<UserVM>();
+            //foreach (var user in users)
+            //{
+            //    result.Add(new UserVM
+            //    {
+            //        Email = user.Email,
+            //        UserName = user.UserName,
+            //        EmailConfirmed = user.EmailConfirmed,
+            //        Name = user.Name,
+            //        Surname = user.Surname
+            //    });
+            //};
             return result;
         }
     }

@@ -130,7 +130,7 @@ namespace Dashboard.API.Controllers
             else { return BadRequest(result); }
         }
         [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers() 
+        public IActionResult GetAllUsers() 
         {
             var result =  _userService.GetAllUsers();
             return Ok(result);

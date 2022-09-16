@@ -19,12 +19,15 @@ namespace Dashboard.Services
         private readonly EmailService _EmailService;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-        public UserService(IUserRepository userRepository, EmailService EmailService, IConfiguration configuration, IMapper mapper)
+        private readonly JwtService _jwtService;
+        public UserService(IUserRepository userRepository, EmailService EmailService,
+            IConfiguration configuration, IMapper mapper, JwtService jwtService)
         {
             _userRepository = userRepository;
             _EmailService = EmailService;
             _configuration = configuration;
             _mapper = mapper;
+            _jwtService = jwtService;
         }
         public async Task<ServiceResponce> LoginUserAsync(LoginUserVM model)
         {
@@ -44,19 +47,14 @@ namespace Dashboard.Services
                     new Claim("Email",model.Email),
                     new Claim(ClaimTypes.NameIdentifier,user.Id)
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AuthSettings:Key"]));
-            var token = new JwtSecurityToken(
-                issuer: _configuration["AuthSettings:Issuer"],
-                audience: _configuration["AuthSettings:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(3),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-                );
-            string tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
+            (string token, DateTime ValidTo) res = _jwtService.GenerateJwtToken(claims);
+            
             return new ServiceResponce()
             {
-                Message = tokenAsString,
-                IsSuccess = true
+                Message = res.token,
+                IsSuccess = true,
+                ExpireDate = res.ValidTo
+
             };
         }
 
@@ -145,7 +143,7 @@ namespace Dashboard.Services
                 Message = $"Reset password for {_configuration["HostSettings:URL"]} has been sent to the email successfully!"
             };
         }
-        public async Task<ServiceResponce> GetAllUsers()
+        public ServiceResponce GetAllUsers()
         {
             var result = _userRepository.GetAllUsers();
             if (result == null)
