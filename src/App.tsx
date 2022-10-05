@@ -1,25 +1,26 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// import React Router Dom
+import { Routes, Route } from "react-router-dom";
 
-function App() {
+// Import components
+import Login from "./pages/auth/login";
+import NotFound from "./pages/notFound";
+import ForgotPassword from "./pages/auth/forgotPassword";
+import Dashboard from "./pages/dashboard";
+//get prop user reducer
+import { useTypedSelector } from "./hooks/useTypedSelector";
+
+
+const  App = ()=> {
+  const {isAuth} = useTypedSelector((store) => store.UserReducer);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<Login />} />
+    {isAuth?<Route path="/dashboard" element={<Dashboard />} />:""}  
+      
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
+      <Route path="*" element={<NotFound />} />
+      {/* <Route index element={<Home />} /> */}
+    </Routes>
   );
 }
 
