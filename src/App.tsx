@@ -14,12 +14,16 @@ const  App = ()=> {
   const {isAuth} = useTypedSelector((store) => store.UserReducer);
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-    {isAuth?<Route path="/dashboard" element={<Dashboard />} />:""}  
+
+     
+    {isAuth?<Route path="/dashboard" element={<Dashboard />} />: 
+    
+     ""}  
+      <Route path="/" element={<Login />} /> + ""+ 
+      <Route path="/forgotPassword" element={<ForgotPassword />} ></Route>
       
-      <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="*" element={<NotFound />} />
-      {/* <Route index element={<Home />} /> */}
+     
     </Routes>
   );
 }

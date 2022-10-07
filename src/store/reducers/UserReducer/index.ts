@@ -21,7 +21,7 @@ const UserReducer = (state = initialState, action: UserActions): UserState => {
         isAuth: true,
         loading: false,
         error: null,
-        user: action.payload.message,
+        user: action.payload.user,
         accessToken: action.payload.accessToken,
         refreshToken: action.payload.refreshToken,
         message: action.payload.message,
@@ -39,7 +39,7 @@ const UserReducer = (state = initialState, action: UserActions): UserState => {
         refreshToken: null,
       };
     case UserActionTypes.FORGOT_PASSWORD_SUCCESS:
-      return { ...state, loading: false, message: action.payload.message };
+      return { ...state, loading: false, message: action.payload.message , accessToken: action.payload.decodedToken };
     default:
       return state;
   }

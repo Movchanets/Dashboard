@@ -1,8 +1,8 @@
 import { UserActions, UserActionTypes } from "../../reducers/UserReducer/types";
 import { Dispatch } from "redux";
 import { toast } from "react-toastify";
-import { login, forgotPassword } from "../../../services/api-user-service";
-
+import { login, forgotPassword, SetRefreshToken, SetAccessToken } from "../../../services/api-user-service";
+import jwtDecode from "jwt-decode";
 export const LoginUser = (user: any) => {
   return async (dispatch: Dispatch<UserActions>) => {
     try {
@@ -17,11 +17,12 @@ export const LoginUser = (user: any) => {
         });
         toast.error(responce.message);
       } else {
-        dispatch({
-          type: UserActionTypes.LOGIN_USER_SUCCESS,
-          payload: responce,
-        });
-     
+        const { accessToken, refreshToken } = responce;
+        console.log(responce)
+        SetAccessToken(accessToken);
+        SetRefreshToken(refreshToken);
+        AuthUser(accessToken, responce.message, dispatch)
+
       }
     } catch (error) {
       dispatch({
@@ -61,3 +62,10 @@ export const ForgotPassword = (email: string) => {
     }
   };
 };
+export const AuthUser = (token: string, message: string, dispatch: Dispatch<UserActions>) => {
+ const decodedToken = jwtDecode(token);
+  dispatch({
+    type: UserActionTypes.LOGIN_USER_SUCCESS,
+    payload: {message , decodedToken}
+  })
+}
