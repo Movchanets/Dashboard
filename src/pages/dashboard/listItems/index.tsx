@@ -6,14 +6,18 @@ import ListSubheader from '@mui/material/ListSubheader';
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-
-export const mainListItems = (
+import { UserShowActions } from '../Components';
+export const MainListItems : React.FC= ()=>{
+  return (
   <React.Fragment>
     <ListItemButton>
+  
       <ListItemIcon>
         <PeopleIcon />
+       
       </ListItemIcon>
-      <ListItemText primary="Users" />
+      
+      <UserShowActions/>
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>
@@ -21,8 +25,8 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Reports" />
     </ListItemButton>
-  </React.Fragment>
-);
+  </React.Fragment>);
+};
 
 export const secondaryListItems = (
   <React.Fragment>

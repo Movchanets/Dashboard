@@ -20,7 +20,8 @@ const  App = ()=> {
     
      ""}  
       <Route path="/" element={<Login />} /> + ""+ 
-      <Route path="/forgotPassword" element={<ForgotPassword />} ></Route>
+      <Route path="/dashboard" element={<Login />} />
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
       
       <Route path="*" element={<NotFound />} />
      
