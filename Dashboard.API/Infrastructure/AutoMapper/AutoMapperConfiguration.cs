@@ -1,10 +1,10 @@
-﻿using Dashboard.Data.AutoMapper;
+﻿using Dashboard.Data.Data.AutoMapper;
 
 namespace Dashboard.API.Infrastructure.AutoMapper
 {
-    public class AutoMapperConfiguration 
+    public class AutoMapperConfiguration
     {
-       public static void Config(IServiceCollection services) 
+        public static void Config(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(AutoMapperUserProfile));
         }

@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="MailKit" Version="3.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="MimeKit" Version="3.4.0" />
   </ItemGroup>
 
   <ItemGroup>
+ 
     <ProjectReference Include="..\Dashboard.Data\Dashboard.Data.csproj" />
   </ItemGroup>
 

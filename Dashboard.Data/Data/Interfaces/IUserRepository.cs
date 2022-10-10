@@ -1,4 +1,5 @@
-﻿using Dashboard.Data.Data.Models;
+﻿
+using Dashboard.Data.Data.Models;
 using Dashboard.Data.Data.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -13,14 +14,17 @@ namespace Dashboard.Data.Data.Interfaces
     {
         Task<IdentityResult> RegisterUserAsync(AppUser model, string password);
         Task<AppUser> LoginUserAsync(LoginUserVM model);
-        Task<string> GenerateEmailConfirmationTokenAsync(AppUser model);
-        Task<IdentityResult> ConfirmEmailAsync(string id, string token);
+        Task<bool> ValidatePasswordAsync(LoginUserVM model, string password);
+        Task<string> GenerateEmailConfirmationTokenAsync(AppUser appUser);
         Task<AppUser> GetUserByIdAsync(string id);
         Task<AppUser> GetUserByEmailAsync(string email);
-        Task<bool> ValidatePasswordAsync(LoginUserVM model);
+        Task<IdentityResult> ConfirmEmailAsync(AppUser model, string token);
         Task<string> GeneratePasswordResetTokenAsync(AppUser model);
         Task<IdentityResult> ResetPasswordAsync(AppUser model, string token, string password);
-        Task<IdentityResult> DeleteUserAsync(AppUser model);
-        List<UserVM> GetAllUsers();
-    }
+        Task SaveRefreshTokenAsync(RefreshToken refreshToken);
+        Task<RefreshToken> CheckRefreshTokenAsync(string refreshToken);
+        Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
+        Task<IList<string>> GetRolesAsync(AppUser model);
+        Task<List<AppUser>> GetAllUsersAsync();
+	}
 }

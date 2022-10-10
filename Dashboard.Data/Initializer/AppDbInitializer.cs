@@ -11,12 +11,11 @@ using System.Threading.Tasks;
 
 namespace Dashboard.Data.Initializer
 {
-
     public class AppDbInitializer
-    {
+    {         
         public static async Task Seed(IApplicationBuilder applicationBuilder)
         {
-            using (IServiceScope? serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
                 UserManager<AppUser> userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
@@ -24,44 +23,52 @@ namespace Dashboard.Data.Initializer
                 {
                     AppUser user = new AppUser()
                     {
-                        Email = "admin@email.com",
-                        NormalizedEmail = "ADMIN@EMAIL.COM",
                         UserName = "master",
-                        NormalizedUserName = "ADMIN@EMAIL.COM",
+                        Email = "master@email.com",
                         EmailConfirmed = true,
                         Name = "Admin",
                         Surname = "Adminovich",
-                        Address = "None",
+                        
                     };
+                    AppUser user2 = new AppUser()
+                    {
+                        UserName = "slavik",
+                        Email = "slavik@email.com",
+                        EmailConfirmed = true,
+                        Name = "Slavik",
+                        Surname = "Movchanets",
 
-
-
+                    };
                     context.Roles.AddRange(
-                         new IdentityRole()
-                         {
-                             Name = "Administrators",
-                             NormalizedName = "ADMINISTRATORS"
-                         }
-                     );
+                        new IdentityRole()
+                        {
+                            Name = "Administrators",
+                            NormalizedName = "ADMINISTRATORS"
+                        }
+                        ,
+                        new IdentityRole()
+                        {
+                            Name = "Users",
+                            NormalizedName = "USERS"
 
-
+                        }); ;
 
                     await context.SaveChangesAsync();
 
-
-
                     IdentityResult result = userManager.CreateAsync(user, "Qwerty-1").Result;
-
-
+                    IdentityResult result2 = userManager.CreateAsync(user2, "Qwerty-1").Result;
 
                     if (result.Succeeded)
                     {
                         userManager.AddToRoleAsync(user, "Administrators").Wait();
                     }
+                    if (result2.Succeeded)
+                    {
+                        userManager.AddToRoleAsync(user2, "Users").Wait();
+                    }
                 }
             }
-
+               
         }
-
     }
 }

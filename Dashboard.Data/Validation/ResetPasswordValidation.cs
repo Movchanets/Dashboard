@@ -1,4 +1,4 @@
-﻿using Compass.Data.Data.ViewModels;
+﻿using Dashboard.Data.Data.ViewModels;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Compass.Data.Validation
+namespace Dashboard.Data.Validation
 {
     public class ResetPasswordValidation : AbstractValidator<ResetPasswordVM>
     {

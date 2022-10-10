@@ -1,44 +1,54 @@
 using Dashboard.API.Infrastructure.AutoMapper;
-using Dashboard.API.Infrastructure.Repository;
+using Dashboard.API.Infrastructure.Repositories;
 using Dashboard.API.Infrastructure.Services;
+using Dashboard.Data.Data.Context;
 using Dashboard.Data.Initializer;
+using Dashboard.Services.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add dababase context
+builder.Services.AddDbContext<AppDbContext>();
 
+// Add AutoMapper configuration 
+AutoMapperConfiguration.Config(builder.Services);
 
-
-//add services configuration 
+//Add Services configuration
 ServicesConfiguration.Config(builder.Services);
-//add repository configuration
+
+// Add Repositories configuration
 RepositoriesConfiguration.Config(builder.Services);
 
-//add jwt
-builder.Services.AddAuthentication(auth =>
+builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
+var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
+var tokenValidationParameters = new TokenValidationParameters
 {
-    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(key),
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    ValidateLifetime = false,
+    RequireExpirationTime = false,
+    ClockSkew = TimeSpan.Zero
+};
 
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddSingleton(tokenValidationParameters);
 
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidIssuer = builder.Configuration.GetSection("AuthSettings").GetValue<string>("Issuer"),
-        ValidAudience = builder.Configuration.GetSection("AuthSettings").GetValue<string>("Audience"),
-        RequireExpirationTime = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AuthSettings").GetValue<string>("Key"))),
-        ValidateIssuerSigningKey = true
-    };
+builder.Services.AddAuthentication(options => {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(jwt => {
+    jwt.SaveToken = true;
+    jwt.TokenValidationParameters = tokenValidationParameters;
 });
 
-//add automapper
-AutoMapperConfiguration.Config(builder.Services);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -49,9 +59,20 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors(options => options
+    .WithOrigins(new[] { "http://localhost:3000" })
+    .AllowAnyHeader()
+    .AllowCredentials()
+);
+
+
 app.MapRazorPages();
 app.MapControllers();
+
 await AppDbInitializer.Seed(app);
 app.Run();
+
+

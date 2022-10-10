@@ -1,9 +1,11 @@
-﻿using Compass.Data.Data.ViewModels;
-using Compass.Data.Validation;
+﻿using Dashboard.Data.Data.Models;
 using Dashboard.Data.Data.Models.ViewModels;
+using Dashboard.Data.Data.ViewModels;
 using Dashboard.Data.Validation;
 using Dashboard.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dashboard.API.Controllers
@@ -12,6 +14,7 @@ namespace Dashboard.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+
         private UserService _userService;
         public UserController(UserService userService)
         {
@@ -19,59 +22,31 @@ namespace Dashboard.API.Controllers
         }
 
         [HttpPost("register")]
-
         public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserVM model)
         {
             var validator = new RegisterUserValidation();
-            var validationResult = await validator.ValidateAsync(model);
+            var validationResult = validator.Validate(model);
             if (validationResult.IsValid)
             {
                 var result = await _userService.RegisterUserAsync(model);
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return Conflict(result);
-                }
+
+                return Ok(result);
             }
             else
             {
                 return BadRequest(validationResult.Errors);
             }
         }
-        [HttpGet("confirmemail")]
-        public async Task<IActionResult> ConfirmEmailAsync(string userid, string token)
-        {
-            if (string.IsNullOrWhiteSpace(userid) || string.IsNullOrWhiteSpace(token)) { return NotFound(); }
-            var result = await _userService.ConfirmEmailAsync(userid, token);
-            if (result.IsSuccess)
 
-            {
-                return RedirectToPage("/EmailConfirm");
-            }
-            else
-            {
-                return BadRequest(result);
-            }
-        }
         [HttpPost("login")]
         public async Task<IActionResult> LoginUserAsync([FromBody] LoginUserVM model)
         {
-            var validator = new LoginUserValidatation();
+            var validator = new LoginUserValidation();
             var validationResult = await validator.ValidateAsync(model);
             if (validationResult.IsValid)
             {
                 var result = await _userService.LoginUserAsync(model);
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return Conflict(result);
-                }
+                return Ok(result);
             }
             else
             {
@@ -79,8 +54,22 @@ namespace Dashboard.API.Controllers
             }
         }
 
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmailAsync(string userId, string token)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+                return NotFound();
 
-        [HttpPost("ForgotPassword")]
+            var result = await _userService.ConfirmEmailAsync(userId, token);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpGet("ForgotPassword")]
         public async Task<IActionResult> ForgotPasswordAsync(string email)
         {
             if (string.IsNullOrEmpty(email))
@@ -99,6 +88,7 @@ namespace Dashboard.API.Controllers
                 return BadRequest(result);
             }
         }
+
         [HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPasswordAsync([FromForm] ResetPasswordVM model)
         {
@@ -110,32 +100,43 @@ namespace Dashboard.API.Controllers
 
                 if (result.IsSuccess)
                 {
-                    return RedirectToPage("/PasswordChanged");
+                    return Ok(result);
                 }
                 return BadRequest(result);
             }
             else
             {
+
                 return BadRequest(validationResult.Errors);
             }
         }
-        [HttpPost("DeleteUser")]
-        public async Task<IActionResult> DeleteUserAsync(string email) 
+
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshTokenAsync(TokenRequestVM model)
         {
-            var result = await _userService.DeleteUserAsync(email);
-            if (result.IsSuccess) 
+            var validator = new TokenRequestValidation();
+            var validationResult = await validator.ValidateAsync(model);
+            if (validationResult.IsValid)
             {
-                return Ok(result);
+                var result = await _userService.RefreshTokenAsync(model);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
             }
-            else { return BadRequest(result); }
+            return BadRequest(validationResult.Errors);
         }
         [HttpGet("GetAllUsers")]
-        public IActionResult GetAllUsers() 
+        public async Task<IActionResult> GetAllUsersAsync() 
         {
-            var result =  _userService.GetAllUsers();
-            return Ok(result);
-        }
+            var result = await _userService.GetAllUsersAsync();
+			if (result.IsSuccess) 
+            {
+                return Ok(result);
 
+            }
+            return BadRequest(result);
+        }
     }
 }
-   

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Compass.Data.Data.ViewModels
+namespace Dashboard.Data.Data.ViewModels
 {
     public class ResetPasswordVM
     {

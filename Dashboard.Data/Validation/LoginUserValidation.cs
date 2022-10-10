@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace Dashboard.Data.Validation
 {
-    public class RegisterUserValidation : AbstractValidator<RegisterUserVM>
+    public class LoginUserValidation : AbstractValidator<LoginUserVM>
     {
-        public RegisterUserValidation()
+        public LoginUserValidation()
         {
-            RuleFor(r => r.Email).EmailAddress().NotEmpty();
+            RuleFor(r => r.Email).NotEmpty().EmailAddress();
             RuleFor(r => r.Password).NotEmpty().MinimumLength(6);
-            RuleFor(r => r.ConfirmPassword).NotEmpty().MinimumLength(6);
         }
     }
 }
