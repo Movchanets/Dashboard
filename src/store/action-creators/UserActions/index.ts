@@ -77,7 +77,7 @@ export const LogOut = (email: string) => {
     try {
       const data = await Log_Out(email);
       const { response } = data;
-      console.log(response);
+
       if (response.isSuccess) {
         dispatch({ type: UserActionTypes.LOG_OUT_SUCCESS, payload: "Log_Out Success" });
         toast("Logout Success");
@@ -115,7 +115,7 @@ export const UserDelete = (email: string) => {
       dispatch({ type: UserActionTypes.START_REQUEST });
       const data = await DeleteUser(email);
       const { response } = data;
-      console.log(response)
+
       if (response.isSuccess) {
         dispatch({
           type: UserActionTypes.DELETE_USER_SUCCESS,
@@ -169,7 +169,7 @@ export const UserUnblock = (email: string) => {
     try {
       dispatch({ type: UserActionTypes.START_REQUEST });
       const data = await UnblockUser(email);
-      console.log(data);
+
       const { response } = data;
       if (response.isSuccess) {
         dispatch({
@@ -198,7 +198,7 @@ export const GetUsers = (pageNumber: number, pageSize: number) => {
       dispatch({ type: UserActionTypes.START_REQUEST });
       const data = await getUsers(pageNumber, pageSize);
       const { response } = data;
-      console.log(response)
+
       if (response.isSuccess) {
         dispatch({
           type: UserActionTypes.ALL_USERS_LOADED,
@@ -217,11 +217,11 @@ export const ChangePassword = (passwordchange: any) => {
   return async (dispatch: Dispatch<UserActions>) => {
     try {
       dispatch({ type: UserActionTypes.START_REQUEST });
-      console.log(passwordchange);
+
       const data = await changePassword(passwordchange);
-      console.log(data);
+
       const { response } = data;
-      console.log(response);
+
       if (!response.isSuccess) {
         dispatch({
           type: UserActionTypes.PASSWORD_CHANGE_ERROR,
@@ -269,7 +269,7 @@ export const ChangeInfo = (Info: any, user: any) => {
           payload: data.response,
 
         });
-        console.log(data.responce);
+
         const { accessToken, refreshToken, message } = data.response;
 
         setAccessToken(accessToken);
@@ -297,10 +297,10 @@ export const registerUser = (user: any) => {
   return async (dispatch: Dispatch<UserActions>) => {
     try {
       dispatch({ type: UserActionTypes.START_REQUEST });
-      console.log(user);
+
       const data = await RegisterUser(user);
       const { response } = data;
-      console.log(response);
+
       if (!response.isSuccess) {
         dispatch({
           type: UserActionTypes.REGISTER_ERROR,
@@ -336,7 +336,7 @@ export const GetRoles = () => {
         });
         toast.error(response.message);
       } else {
-        console.log(response);
+
 
         dispatch({
           type: UserActionTypes.GETROLES_SUCCESS,

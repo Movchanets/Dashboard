@@ -153,7 +153,7 @@ const Users: React.FC<any> = () => {
   useEffect(() => {
     GetUsers(page, pageSize);
   }, [pageSize, page]);
-  useEffect(() => { console.log(page, pageSize) }, [page, pageSize]);
+
   if (loading) {
     return <Loader />;
   }

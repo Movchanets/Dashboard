@@ -24,7 +24,7 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   (res) => {
-    console.log("res => ", res)
+
     return res;
   },
   async (err) => {
@@ -71,7 +71,7 @@ instance.interceptors.response.use(
 );
 
 function refreshAccessToken() {
-  console.log("refreshAccessToken")
+
   return instance.post("/RefreshToken", {
     token: getAccessToken(),
     refreshToken: getrefreshToken()
