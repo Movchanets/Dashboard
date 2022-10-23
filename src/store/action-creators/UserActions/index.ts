@@ -1,30 +1,39 @@
-import { UserActions, UserActionTypes } from "../../reducers/UserReducer/types";
+import { UserActionTypes, UserActions } from "../../reducers/userReducer/types";
 import { Dispatch } from "redux";
 import { toast } from "react-toastify";
-import { login, forgotPassword, SetRefreshToken, SetAccessToken, RemoveTokens } from "../../../services/api-user-service";
+import {
+  login, RegisterUser, changeInfo, GetAllRoles, forgotPassword, changePassword,
+  removeTokens, getUsers, BlockUser, UnblockUser, Log_Out, DeleteUser,
+} from "../../../services/api-user-service";
 import jwtDecode from "jwt-decode";
+import {
+  setAccessToken,
+  setRefreshToken,
+  getAccessToken,
+  getrefreshToken
+} from "../../../services/api-user-service";
+
+
 export const LoginUser = (user: any) => {
   return async (dispatch: Dispatch<UserActions>) => {
     try {
-      dispatch({ type: UserActionTypes.LOGIN_USER });
+      dispatch({ type: UserActionTypes.START_REQUEST });
       const data = await login(user);
-      const { responce } = data;
-      console.log(responce);
-      if (!responce.isSuccess) {
+      const { response } = data;
+      if (!response.isSuccess) {
         dispatch({
           type: UserActionTypes.LOGIN_USER_ERROR,
-          payload: responce.message,
+          payload: data.response.message,
         });
-        toast.error(responce.message);
+        toast.error(response.message);
       } else {
-        const { accessToken, refreshToken } = responce;
-        console.log(responce)
-        SetAccessToken(accessToken);
-        SetRefreshToken(refreshToken);
-        AuthUser(accessToken, responce.message, dispatch)
+        const { accessToken, refreshToken, message } = data.response;
 
+        setAccessToken(accessToken);
+        setRefreshToken(refreshToken);
+        AuthUser(accessToken, message, dispatch);
       }
-    } catch (error) {
+    } catch (e) {
       dispatch({
         type: UserActionTypes.SERVER_USER_ERROR,
         payload: "Unknown error",
@@ -36,25 +45,22 @@ export const LoginUser = (user: any) => {
 export const ForgotPassword = (email: string) => {
   return async (dispatch: Dispatch<UserActions>) => {
     try {
-      dispatch({ type: UserActionTypes.FORGOT_USER_PASSWORD });
+      dispatch({ type: UserActionTypes.START_REQUEST });
       const data = await forgotPassword(email);
-      const { responce } = data;
-
-      if (!responce.isSuccess) {
+      const { response } = data;
+      if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.FORGOT_USER_PASSWORD_SUCCESS,
-          payload: responce.message,
+          type: UserActionTypes.FORGOT_USER_PASSWORD_ERROR,
+          payload: data.response,
         });
-        toast.error(responce.message);
+        toast.error(response.message);
       } else {
-        console.log("inside else");
         dispatch({
           type: UserActionTypes.FORGOT_USER_PASSWORD_SUCCESS,
-          payload: responce.message,
+          payload: data.response,
         });
-        toast.success(responce.message);
       }
-    } catch (error) {
+    } catch (e) {
       dispatch({
         type: UserActionTypes.SERVER_USER_ERROR,
         payload: "Unknown error",
@@ -62,18 +68,288 @@ export const ForgotPassword = (email: string) => {
     }
   };
 };
+
+export const LogOut = (email: string) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+
+
+
+    try {
+      const data = await Log_Out(email);
+      const { response } = data;
+      console.log(response);
+      if (response.isSuccess) {
+        dispatch({ type: UserActionTypes.LOG_OUT_SUCCESS, payload: "Log_Out Success" });
+        toast("Logout Success");
+      }
+      else {
+        dispatch({ type: UserActionTypes.LOG_OUT_ERROR, payload: "Log_Out Error" });
+      }
+    } catch (error) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "LogOut user error",
+      });
+    }
+    removeTokens();
+    dispatch({
+      type: UserActionTypes.LOGOUT_USER
+    });
+  }
+}
+
 export const AuthUser = (token: string, message: string, dispatch: Dispatch<UserActions>) => {
- const decodedToken = jwtDecode(token);
+  const decodedToken = jwtDecode(token) as any;
   dispatch({
     type: UserActionTypes.LOGIN_USER_SUCCESS,
-    payload: {message , decodedToken}
-  })
-}
-export const LogOut =()=>
-{return async (dispatch : Dispatch<UserActions>) =>
-  {
-    RemoveTokens() ;
-    dispatch({type: UserActionTypes.LOGOUT_USER   });
-  }
+    payload: {
+      message,
+      decodedToken
+    },
+  });
+};
+export const UserDelete = (email: string) => {
 
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      const data = await DeleteUser(email);
+      const { response } = data;
+      console.log(response)
+      if (response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.DELETE_USER_SUCCESS,
+          payload: "User Deleted",
+        });
+        toast("User Deleted")
+      }
+      else {
+        dispatch({
+          type: UserActionTypes.DELETE_USER_SUCCESS,
+          payload: "User Deleted error",
+        });
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Block user error",
+      });
+    }
+  }
 }
+export const UserBlock = (email: string) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      const data = await BlockUser(email);
+      const { response } = data;
+      if (response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.BLOCK_USER_SUCCESS,
+          payload: "User blocked",
+        });
+        toast("User Blocked")
+      }
+      else {
+        dispatch({
+          type: UserActionTypes.BLOCK_USER_ERROR,
+          payload: "Unknown error",
+        });
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Block user error",
+      });
+    }
+  }
+}
+export const UserUnblock = (email: string) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      const data = await UnblockUser(email);
+      console.log(data);
+      const { response } = data;
+      if (response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.UNBLOCK_USER_SUCCESS,
+          payload: "User unblocked",
+        });
+        toast("User Unblocked")
+      }
+      else {
+        dispatch({
+          type: UserActionTypes.UNBLOCK_USER_SUCCESS,
+          payload: "Unblock user error",
+        });
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Unknown error",
+      });
+    }
+  }
+}
+export const GetUsers = (pageNumber: number, pageSize: number) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      const data = await getUsers(pageNumber, pageSize);
+      const { response } = data;
+      console.log(response)
+      if (response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.ALL_USERS_LOADED,
+          payload: response,
+        });
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Unknown error",
+      });
+    }
+  };
+}
+export const ChangePassword = (passwordchange: any) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      console.log(passwordchange);
+      const data = await changePassword(passwordchange);
+      console.log(data);
+      const { response } = data;
+      console.log(response);
+      if (!response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.PASSWORD_CHANGE_ERROR,
+          payload: data.response.message,
+        });
+        toast.error(response.message);
+      } else {
+
+        dispatch({
+          type: UserActionTypes.PASSWORD_CHANGE_SUCCESS,
+          payload: data.response,
+
+        });
+        toast(data.response.message);
+
+
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Unknown error",
+      });
+    }
+  };
+};
+export const ChangeInfo = (Info: any, user: any) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+
+      const data = await changeInfo(Info);
+
+      const { response } = data;
+
+      if (!response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.CHANGE_ERROR,
+          payload: data.response.message,
+        });
+        toast.error(response.message);
+      } else {
+
+        dispatch({
+          type: UserActionTypes.CHANGE_SUCCESS,
+          payload: data.response,
+
+        });
+        console.log(data.responce);
+        const { accessToken, refreshToken, message } = data.response;
+
+        setAccessToken(accessToken);
+        setRefreshToken(refreshToken);
+        AuthUser(accessToken, message, dispatch);
+        toast(data.response.message);
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Unknown error",
+      });
+    }
+  };
+};
+export const UpdateUser = (user: any) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    dispatch({
+      type: UserActionTypes.CHANGE_SUCCESS,
+      payload: user
+    });
+  }
+}
+export const registerUser = (user: any) => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      console.log(user);
+      const data = await RegisterUser(user);
+      const { response } = data;
+      console.log(response);
+      if (!response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.REGISTER_ERROR,
+          payload: data.response.message,
+        });
+        toast.error(response.message);
+      } else {
+        dispatch({
+          type: UserActionTypes.REGISTER_SUCCESS,
+          payload: data.response.message,
+        });
+        toast(data.response.message);
+
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Unknown error",
+      });
+    }
+  };
+};
+export const GetRoles = () => {
+  return async (dispatch: Dispatch<UserActions>) => {
+    try {
+      dispatch({ type: UserActionTypes.START_REQUEST });
+      const data = await GetAllRoles();
+      const { response } = data;
+      if (!response.isSuccess) {
+        dispatch({
+          type: UserActionTypes.GETROLES_ERROR,
+          payload: data.response.message,
+        });
+        toast.error(response.message);
+      } else {
+        console.log(response);
+
+        dispatch({
+          type: UserActionTypes.GETROLES_SUCCESS,
+          payload: response,
+        });
+
+
+      }
+    } catch (e) {
+      dispatch({
+        type: UserActionTypes.SERVER_USER_ERROR,
+        payload: "Unknown error",
+      });
+    }
+  };
+};

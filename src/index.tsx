@@ -1,21 +1,24 @@
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { store } from "./store";
 import { Provider } from "react-redux";
+import { store } from "./store";
 import App from "./App";
-import { GetAccessToken } from "./services/api-user-service";
-import { AuthUser  } from "./store/action-creators/UserActions";
+import { AuthUser } from "./store/action-creators/userActions";
+import { getAccessToken } from "./services/api-user-service";
+import { ToastContainer } from 'react-toastify';
+
+const token = getAccessToken();
+if (token) {
+  AuthUser(token, "Loaded from localStorrage", store.dispatch);
+}
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
-const token = GetAccessToken();
-if( token!=null)
-{
-  AuthUser(token, "Loaded from LC",store.dispatch);
-}
 root.render(
   <Provider store={store}>
     <BrowserRouter>
+      <ToastContainer autoClose={5000} />
       <App />
     </BrowserRouter>
   </Provider>
