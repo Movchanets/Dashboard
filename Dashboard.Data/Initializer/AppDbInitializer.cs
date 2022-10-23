@@ -19,11 +19,11 @@ namespace Dashboard.Data.Initializer
             {
                 var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
                 UserManager<AppUser> userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-                if (userManager.FindByNameAsync("master").Result == null)
+                if (userManager.FindByNameAsync("master2").Result == null)
                 {
                     AppUser user = new AppUser()
                     {
-                        UserName = "master",
+                        UserName = "master2",
                         Email = "master@email.com",
                         EmailConfirmed = true,
                         Name = "Admin",

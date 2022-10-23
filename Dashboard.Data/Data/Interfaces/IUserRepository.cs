@@ -12,9 +12,10 @@ namespace Dashboard.Data.Data.Interfaces
 {
     public interface IUserRepository
     {
-        Task<IdentityResult> RegisterUserAsync(AppUser model, string password);
-        Task<AppUser> LoginUserAsync(LoginUserVM model);
-        Task<bool> ValidatePasswordAsync(LoginUserVM model, string password);
+        Task<IdentityResult> RegisterUserAsync(AppUser model, RegisterUserVM vmodel);
+        Task<SignInResult> LoginUserAsync(AppUser user,bool RememberMe ,string password);
+		Task<bool> CanUserSignIn(AppUser model);
+		Task<bool> ValidatePasswordAsync(LoginUserVM model, string password);
         Task<string> GenerateEmailConfirmationTokenAsync(AppUser appUser);
         Task<AppUser> GetUserByIdAsync(string id);
         Task<AppUser> GetUserByEmailAsync(string email);
@@ -24,7 +25,15 @@ namespace Dashboard.Data.Data.Interfaces
         Task SaveRefreshTokenAsync(RefreshToken refreshToken);
         Task<RefreshToken> CheckRefreshTokenAsync(string refreshToken);
         Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
-        Task<IList<string>> GetRolesAsync(AppUser model);
-        Task<List<AppUser>> GetAllUsersAsync();
-	}
+		Task<List<string>> GetAllRolesAsync();
+		Task<IList<string>> GetRolesAsync(AppUser model);
+        Task<List<AppUser>> GetUsersAsync(int start, int end);
+		Task<IdentityResult> ChangeUserInfo(UserInfoVM model);
+		Task<IdentityResult> ChangeUserPassword(ChangePasswordVM model);
+		Task<IdentityResult> BlockUserAsync(AppUser user);
+		Task<IdentityResult> UnblockUserAsync(AppUser user);
+        Task<IdentityResult> DeleteUserAsync(AppUser user);
+        Task<bool> IsUserLockedAsync(AppUser user);
+        Task DeleteRefreshTokens(string? userid);
+    }
 }

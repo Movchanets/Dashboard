@@ -4,13 +4,17 @@ using Dashboard.Data.Data.ViewModels;
 using Dashboard.Data.Validation;
 using Dashboard.Services;
 using FluentValidation;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dashboard.API.Controllers
 {
-    [Route("api/[controller]")]
+	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+	[Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -21,6 +25,7 @@ namespace Dashboard.API.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Administrators")]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserVM model)
         {
@@ -38,11 +43,12 @@ namespace Dashboard.API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginUserAsync([FromBody] LoginUserVM model)
         {
             var validator = new LoginUserValidation();
-            var validationResult = await validator.ValidateAsync(model);
+            var validationResult = validator.Validate(model);
             if (validationResult.IsValid)
             {
                 var result = await _userService.LoginUserAsync(model);
@@ -53,7 +59,8 @@ namespace Dashboard.API.Controllers
                 return BadRequest(validationResult.Errors);
             }
         }
-
+        
+        [AllowAnonymous]
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmailAsync(string userId, string token)
         {
@@ -69,8 +76,9 @@ namespace Dashboard.API.Controllers
             return BadRequest(result);
         }
 
-        [HttpGet("ForgotPassword")]
-        public async Task<IActionResult> ForgotPasswordAsync(string email)
+        [AllowAnonymous]
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPasswordAsync([FromBody]  string email)
         {
             if (string.IsNullOrEmpty(email))
             {
@@ -89,6 +97,7 @@ namespace Dashboard.API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPasswordAsync([FromForm] ResetPasswordVM model)
         {
@@ -106,13 +115,13 @@ namespace Dashboard.API.Controllers
             }
             else
             {
-
                 return BadRequest(validationResult.Errors);
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("RefreshToken")]
-        public async Task<IActionResult> RefreshTokenAsync(TokenRequestVM model)
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] TokenRequestVM model)
         {
             var validator = new TokenRequestValidation();
             var validationResult = await validator.ValidateAsync(model);
@@ -125,18 +134,100 @@ namespace Dashboard.API.Controllers
                 }
                 return BadRequest(result);
             }
-            return BadRequest(validationResult.Errors);
+            else
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
         }
-        [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsersAsync() 
+		[Authorize]
+		[HttpPost("ChangeInfoUser")]
+		public async Task<IActionResult> ChangeUserInfo([FromBody] UserInfoVM model)
+		{
+            var result = await _userService.ChangeUserInfo(model);
+            if (result.IsSuccess) { return Ok(result); }
+            return BadRequest(result);
+		}
+		[Authorize]
+		[HttpPost("ChangeUserPassword")]
+		public async Task<IActionResult> ChangeUserPassword([FromBody] ChangePasswordVM model)
+		{
+			var result = await _userService.ChangeUserPassword(model);
+			if (result.IsSuccess) { return Ok(result); }
+			return BadRequest(result);
+		}
+		[Authorize(Roles = "Administrators")]
+		[HttpPost("GetUsers")]
+        public async Task<IActionResult> GetUsersAsync([FromBody] GetUsersVM model)
         {
-            var result = await _userService.GetAllUsersAsync();
-			if (result.IsSuccess) 
+            var result = await _userService.GetUsersAsync(model.pageNumber, model.pageSize);
+            if (result.IsSuccess)
             {
                 return Ok(result);
 
             }
             return BadRequest(result);
         }
-    }
+        [Authorize(Roles = "Administrators")]
+        [HttpGet("GetAllRoles")]
+        public async Task<IActionResult> GetAllRolesAsync()
+        {
+            var result = await _userService.GetRolesAsync();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+
+            }
+            return BadRequest(result);
+        }
+		[Authorize(Roles = "Administrators")]
+		[HttpGet("BlockUser")]
+		public async Task<IActionResult> BlockUserAsync(string email)
+		{
+            var result = await _userService.BlockUserAsync(email);
+			if (result.IsSuccess)
+			{
+				return Ok(result);
+
+			}
+			return BadRequest(result);
+		}
+		[Authorize(Roles = "Administrators")]
+		[HttpGet("UnblockUser")]
+		public async Task<IActionResult> UnblockUserAsync(string email)
+		{
+			var result = await _userService.UnblockUserAsync(email);
+			if (result.IsSuccess)
+			{
+				return Ok(result);
+
+			}
+			return BadRequest(result);
+		}
+		[Authorize(Roles = "Administrators")]
+		[HttpGet("DeleteUser")]
+		public async Task<IActionResult> DeleteUserAsync(string email)
+		{
+			var result = await _userService.DeleteUserAsync(email);
+			if (result.IsSuccess)
+			{
+				return Ok(result);
+
+			}
+			return BadRequest(result);
+		}
+		[Authorize]
+		[HttpGet("LogOut")]
+		public async Task<IActionResult> LogOutAsync(string email)
+		{
+			var result = await _userService.LogOutAsync(email);
+			if (result.IsSuccess)
+			{
+				return Ok(result);
+
+			}
+			return BadRequest(result);
+		}
+	
+	}
 }

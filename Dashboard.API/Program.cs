@@ -59,14 +59,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(options => options
+	.WithOrigins(new[] { "http://localhost:3000" })
+	.AllowAnyHeader()
+	.AllowCredentials()
+);
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors(options => options
-    .WithOrigins(new[] { "http://localhost:3000" })
-    .AllowAnyHeader()
-    .AllowCredentials()
-);
+
 
 
 app.MapRazorPages();

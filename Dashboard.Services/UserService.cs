@@ -3,6 +3,8 @@ using Dashboard.Data.Data.Interfaces;
 using Dashboard.Data.Data.Models;
 using Dashboard.Data.Data.Models.ViewModels;
 using Dashboard.Data.Data.ViewModels;
+using Dashboard.Data.Validation;
+using FluentValidation;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +55,7 @@ namespace Dashboard.Services
 
             var newUser = _mapper.Map<RegisterUserVM, AppUser>(model);
 
-            var result = await  _userRepository.RegisterUserAsync(newUser, model.Password);
+            var result = await  _userRepository.RegisterUserAsync(newUser, model);
             if (result.Succeeded)
             {
                 var token = await _userRepository.GenerateEmailConfirmationTokenAsync(newUser);
@@ -89,41 +91,50 @@ namespace Dashboard.Services
 
         public async Task<ServiceResponse> LoginUserAsync(LoginUserVM model)
         {
-            var user = await _userRepository.LoginUserAsync(model);
+            var user = await _userRepository.GetUserByEmailAsync(model.Email);
 
             if (user == null)
             {
                 return new ServiceResponse
                 {
                     Message = "Login incorrect.",
-                    IsSuccess = false
+                    IsSuccess = false,
+                    
                 };
             }
-
-            var result = await _userRepository.ValidatePasswordAsync(model, model.Password);
-            if (!result)
+            if(!(await _userRepository.CanUserSignIn(user))) 
             {
-                return new ServiceResponse
-                {
-                    Message = "Password incorrect.",
-                    IsSuccess = false
-                };
+                return new ServiceResponse { Message = "You cannot login now, account is blocked" ,IsSuccess = false};
             }
-
+            var result = await _userRepository.LoginUserAsync(user,model.RememberMe, model.Password);
+            if (result.Succeeded) 
+            {
+            
             var tokens = await _jwtService.GenerateJwtTokenAsync(user);
 
             return new ServiceResponse
             {
                 AccessToken = tokens.token,
                 RefreshToken = tokens.refreshToken.Token,
-                Message = "Logeed in successfully.",
-                IsSuccess = true, 
-            };
-        }
+                Message = "Logged in successfully.",
+                IsSuccess = true,
+				Payload =  await _userRepository.GetAllRolesAsync()
+			};
+			}
+            else 
+            {
+                
+                return _userRepository.IsUserLockedAsync(user).Result ?new ServiceResponse
+                { Message = "User locked, try again in 5 minutes", IsSuccess = false }
+                : new ServiceResponse { Message = "Wrong password", IsSuccess = false };
+            }
+		}
 
-		public async Task<ServiceResponse> GetAllUsersAsync()
+		public async Task<ServiceResponse> GetUsersAsync(int pageNumber, int pageSize)
 		{
-            var users = await _userRepository.GetAllUsersAsync();
+            int start = pageNumber * pageSize;
+            int end = pageSize * pageNumber + pageSize;
+            var users = await _userRepository.GetUsersAsync(start, end);
             var usersVM = new List<AllUserVM>();
 
 
@@ -132,15 +143,19 @@ namespace Dashboard.Services
             {
                 var Alluser = new AllUserVM()
                 {
+                    Id = user.Id,
                     Name = user.Name,
                     Surname = user.Surname,
                     UserName = user.UserName,
                     Email = user.Email,
-                    EmailConfirmed = user.EmailConfirmed
+                    Phone = user.PhoneNumber,
+                    EmailConfirm = user.EmailConfirmed,
+                    isBlocked = user.LockoutEnabled,
                 };
                 var roles = await _userRepository.GetRolesAsync(user);
-                Alluser.Role = roles.First();
-                usersVM.Add(Alluser);
+                Alluser.Role = roles.First(); 
+
+				usersVM.Add(Alluser);
             }
           
 			if (usersVM != null) 
@@ -149,7 +164,7 @@ namespace Dashboard.Services
                 {
                     IsSuccess = true,
                     Payload = usersVM,
-                    Message = "User loaded"
+                    Message = "Users loaded"
                 };
             }
             return new ServiceResponse
@@ -257,10 +272,226 @@ namespace Dashboard.Services
             };
         }
 
-        public async Task<ServiceResponse> RefreshTokenAsync(TokenRequestVM model)
+		public async Task<ServiceResponse> RefreshTokenAsync(TokenRequestVM model)
+		{
+			var result = await _jwtService.VerifyTokenAsync(model);
+			if (result == null)
+			{
+				return result;
+			}
+			else
+			{
+				return result;
+			}
+		}
+
+		public async Task<ServiceResponse> GetRolesAsync()
         {
-            var result = await _jwtService.VerifyTokenAsync(model);
-            return result;
+            var roles = await _userRepository.GetAllRolesAsync();
+            if (roles != null)
+            {
+                return new ServiceResponse
+                {
+                    Message = "All roles sent",
+                    Payload = roles,
+                    IsSuccess = true
+                };
+            }
+            return new ServiceResponse
+            {
+                Message = "Some error occured",
+                IsSuccess = false
+            };
         }
-    }
+
+        public async Task<ServiceResponse> ChangeUserInfo(UserInfoVM model)
+        {
+            var validator = new UserInfoValidation();
+            var validationResult =  await validator.ValidateAsync(model);
+            if (validationResult.IsValid) { 
+            var result = await _userRepository.ChangeUserInfo(model);
+            if (result.Succeeded)
+            { var user = await _userRepository.GetUserByEmailAsync(model.Email);
+              var tokens = await _jwtService.GenerateJwtTokenAsync(user);
+                return new ServiceResponse
+                {
+                    IsSuccess = true,
+                    Message = "User Profile Changed",
+					AccessToken = tokens.token,
+					RefreshToken = tokens.refreshToken.Token,
+				};
+            }
+            return new ServiceResponse
+            {
+                Message = "Some Entity error occured",
+                IsSuccess = false
+        };
+			}
+            return new ServiceResponse
+            {
+                Message = "Some validation error occured : ",
+                Errors = validationResult.Errors.Select(i => i.ErrorCode + "  :  " + i.ErrorMessage),
+                IsSuccess = false
+            };
+		}
+
+        public async Task<ServiceResponse> ChangeUserPassword(ChangePasswordVM model)
+        {
+            var validator = new ChangePasswordValidation();
+            var validationResult = await validator.ValidateAsync(model);
+            if (validationResult.IsValid)
+            {
+                var result = await _userRepository.ChangeUserPassword(model);
+                if (result.Succeeded) 
+                {
+					return new ServiceResponse
+					{
+						IsSuccess = true,
+						Message = "User Password Changed"
+					};
+				}
+                return new ServiceResponse
+                {
+                    Message = "Password dont match",
+                    IsSuccess = false
+                };
+            }
+            else
+            {
+                return new ServiceResponse
+                {
+                    Message = "Some validation error occured : ",
+                    Errors = validationResult.Errors.Select(i => i.ErrorCode + "  :  " + i.ErrorMessage),
+                    IsSuccess = false
+                };
+            }
+        }
+
+        public async Task<ServiceResponse> BlockUserAsync(string email)
+        {
+            AppUser? user = await _userRepository.GetUserByEmailAsync(email);
+            if(user == null) {
+                return new ServiceResponse
+                {
+                    Message = "User not exists",
+                    IsSuccess = false
+                };
+            }
+            var result = await _userRepository.BlockUserAsync(user);
+            if (result.Succeeded) 
+            {
+                return new ServiceResponse
+                {
+                    Message = "User Successfully blocked",
+                    IsSuccess = true
+                };
+		}
+            return new ServiceResponse
+            {
+                Message = "Some error occured",
+                IsSuccess = false
+            };
+}
+		public async Task<ServiceResponse> UnblockUserAsync(string email)
+		{
+			AppUser? user = await _userRepository.GetUserByEmailAsync(email);
+			if (user == null)
+			{
+				return new ServiceResponse
+				{
+					Message = "User not exists",
+					IsSuccess = false
+				};
+			}
+			var result = await _userRepository.UnblockUserAsync(user);
+			if (result.Succeeded)
+			{
+				return new ServiceResponse
+				{
+					Message = "User Successfully blocked",
+					IsSuccess = true
+				};
+			}
+			return new ServiceResponse
+			{
+				Message = "Some error occured",
+				IsSuccess = false
+			};
+		}
+
+        public async Task<ServiceResponse> DeleteUserAsync(string email)
+        {
+			AppUser? user = await _userRepository.GetUserByEmailAsync(email);
+			if (user == null)
+			{
+				return new ServiceResponse
+				{
+					Message = "User not exists",
+					IsSuccess = false
+				};
+			}
+			var result = await _userRepository.DeleteUserAsync(user);
+			if (result.Succeeded)
+			{
+				return new ServiceResponse
+				{
+					Message = "User Successfully deleted",
+					IsSuccess = true
+				};
+			}
+			return new ServiceResponse
+			{
+				Message = "Some error occured",
+				IsSuccess = false
+			};
+		}
+
+        public async Task<ServiceResponse> LogOutAsync(string email)
+        {
+            var user = await _userRepository.GetUserByEmailAsync(email);
+            if (user == null) 
+            {
+				return new ServiceResponse
+				{
+					Message = "User not exists",
+					IsSuccess = false
+				};
+			}
+			 await _userRepository.DeleteRefreshTokens(user.Id);
+                return new ServiceResponse { Message = "LogOut Success", IsSuccess = true };
+            
+       
+		}
+
+      
+		public async Task<ServiceResponse> GetNewTokenAsync(string email)
+		{
+			var user = await _userRepository.GetUserByEmailAsync(email);
+
+			if (user == null)
+			{
+				return new ServiceResponse
+				{
+					Message = "Login incorrect.",
+					IsSuccess = false,
+
+				};
+			}
+			
+			
+
+				var tokens = await _jwtService.GenerateJwtTokenAsync(user);
+
+				return new ServiceResponse
+				{
+					AccessToken = tokens.token,
+					RefreshToken = tokens.refreshToken.Token,
+					Message = "JwtUpdated successfully.",
+					IsSuccess = true,
+					Payload = await _userRepository.GetAllRolesAsync()
+				};
+			
+		
+		}
+	}
 }

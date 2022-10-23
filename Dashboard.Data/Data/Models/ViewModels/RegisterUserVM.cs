@@ -12,5 +12,6 @@ namespace Dashboard.Data.Data.Models.ViewModels
         public string Password { get; set; }
 
         public string ConfirmPassword { get; set; }
+        public string Role { get; set; }
     }
 }
