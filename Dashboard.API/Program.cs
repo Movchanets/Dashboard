@@ -7,6 +7,7 @@ using Dashboard.Services.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +38,22 @@ var tokenValidationParameters = new TokenValidationParameters
 };
 
 builder.Services.AddSingleton(tokenValidationParameters);
+var logger = new LoggerConfiguration()
 
+
+		.ReadFrom.Configuration(builder.Configuration)
+
+
+		.Enrich.FromLogContext()
+
+
+		.CreateLogger();
+
+
+builder.Logging.ClearProviders();
+
+
+builder.Logging.AddSerilog(logger);
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;

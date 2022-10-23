@@ -18,11 +18,12 @@ namespace Dashboard.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-
-        private UserService _userService;
-        public UserController(UserService userService)
+		private readonly ILogger<UserController> _logger;
+		private UserService _userService;
+        public UserController(UserService userService, ILogger<UserController> logger)
         {
             _userService = userService;
+           _logger = logger;
         }
 
         [Authorize(Roles = "Administrators")]
@@ -39,7 +40,9 @@ namespace Dashboard.API.Controllers
             }
             else
             {
-                return BadRequest(validationResult.Errors);
+                _logger.LogInformation("Bad Register request");
+
+				return BadRequest(validationResult.Errors);
             }
         }
 
@@ -55,8 +58,9 @@ namespace Dashboard.API.Controllers
                 return Ok(result);
             }
             else
-            {
-                return BadRequest(validationResult.Errors);
+			{
+				_logger.LogInformation("Bad Login request");
+				return BadRequest(validationResult.Errors);
             }
         }
         
@@ -73,7 +77,8 @@ namespace Dashboard.API.Controllers
             {
                 return Ok(result);
             }
-            return BadRequest(result);
+			_logger.LogInformation("Bad ConfirmEmail request");
+			return BadRequest(result);
         }
 
         [AllowAnonymous]
@@ -93,7 +98,8 @@ namespace Dashboard.API.Controllers
             }
             else
             {
-                return BadRequest(result);
+				_logger.LogInformation("Bad ForgotPassword request");
+				return BadRequest(result);
             }
         }
 
@@ -111,11 +117,13 @@ namespace Dashboard.API.Controllers
                 {
                     return Ok(result);
                 }
-                return BadRequest(result);
+				_logger.LogInformation("Bad ResetPassword request");
+				return BadRequest(result);
             }
             else
             {
-                return BadRequest(validationResult.Errors);
+				_logger.LogInformation("Bad ResetPassword request");
+				return BadRequest(validationResult.Errors);
             }
         }
 
@@ -136,7 +144,8 @@ namespace Dashboard.API.Controllers
             }
             else
             {
-                return BadRequest(validationResult.Errors);
+				_logger.LogInformation("Bad RefreshToken request");
+				return BadRequest(validationResult.Errors);
             }
 
         }
@@ -146,7 +155,8 @@ namespace Dashboard.API.Controllers
 		{
             var result = await _userService.ChangeUserInfo(model);
             if (result.IsSuccess) { return Ok(result); }
-            return BadRequest(result);
+			_logger.LogInformation("Bad ChangeUserInfo request");
+			return BadRequest(result);
 		}
 		[Authorize]
 		[HttpPost("ChangeUserPassword")]
@@ -154,6 +164,7 @@ namespace Dashboard.API.Controllers
 		{
 			var result = await _userService.ChangeUserPassword(model);
 			if (result.IsSuccess) { return Ok(result); }
+			_logger.LogInformation("Bad ChangeUserPassword request");
 			return BadRequest(result);
 		}
 		[Authorize(Roles = "Administrators")]
@@ -166,7 +177,8 @@ namespace Dashboard.API.Controllers
                 return Ok(result);
 
             }
-            return BadRequest(result);
+			_logger.LogInformation("Bad GetUsersAsync request");
+			return BadRequest(result);
         }
         [Authorize(Roles = "Administrators")]
         [HttpGet("GetAllRoles")]
@@ -178,7 +190,8 @@ namespace Dashboard.API.Controllers
                 return Ok(result);
 
             }
-            return BadRequest(result);
+			
+			return BadRequest(result);
         }
 		[Authorize(Roles = "Administrators")]
 		[HttpGet("BlockUser")]
@@ -190,6 +203,7 @@ namespace Dashboard.API.Controllers
 				return Ok(result);
 
 			}
+			_logger.LogInformation("Bad BlockUserAsync request");
 			return BadRequest(result);
 		}
 		[Authorize(Roles = "Administrators")]
@@ -202,6 +216,7 @@ namespace Dashboard.API.Controllers
 				return Ok(result);
 
 			}
+			_logger.LogInformation("Bad UnblockUserAsync request");
 			return BadRequest(result);
 		}
 		[Authorize(Roles = "Administrators")]
@@ -214,6 +229,7 @@ namespace Dashboard.API.Controllers
 				return Ok(result);
 
 			}
+			_logger.LogInformation("Bad DeleteUserAsync request");
 			return BadRequest(result);
 		}
 		[Authorize]

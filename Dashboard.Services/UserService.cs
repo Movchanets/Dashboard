@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -28,8 +29,9 @@ namespace Dashboard.Services
         private EmailService _emailService;
         private JwtService _jwtService;
         private readonly IMapper _mapper;
+	
 
-        public UserService(IUserRepository userRepository, IConfiguration configuration, EmailService emailService, IMapper mapper, JwtService jwtService)
+		public UserService(IUserRepository userRepository, IConfiguration configuration, EmailService emailService, IMapper mapper, JwtService jwtService)
         {
             _userRepository = userRepository;
             _configuration = configuration;
@@ -48,7 +50,7 @@ namespace Dashboard.Services
             {
                 return new ServiceResponse
                 {
-                    Message = "Confirm pssword do not match",
+                    Message = "Confirm password do not match",
                     IsSuccess = false
                 };
             }
