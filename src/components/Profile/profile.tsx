@@ -4,7 +4,6 @@ import { Avatar, Box, Button, Container, createTheme, CssBaseline, InputLabel, M
 import { Field, Formik } from 'formik';
 import { useTypedSelector } from '../../hooks/useTypedSelector';
 
-import Copyright from '../copyright';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import { useActions } from '../../hooks/useActions';
 import { PasswordSchema, ProfileSchema } from './validation';
@@ -22,24 +21,25 @@ const Profile: React.FC<any> = () => {
 		Phone: "",
 		Email: "",
 	};
-	useEffect(() => {
-		if (location.state != null) {
-			let { User } = location.state;
-			initialValues.Name = User.name ?? "";
-			initialValues.Surname = User.surname ?? "";
-			initialValues.Phone = User.phone ?? "";
-			initialValues.Email = User.email;
-			initialValues.UserName = User.userName ?? "";
-		}
-		else {
 
-			initialValues.Name = user.Name ?? "";
-			initialValues.Surname = user.Surname ?? "";
-			initialValues.Phone = user.Phone ?? "";
-			initialValues.UserName = user.UserName ?? "";
-			initialValues.Email = user.Email ?? "";
-		}
-	}, []);
+	if (location.state != null) {
+		let { User } = location.state;
+		initialValues.Name = User.name ?? "";
+		initialValues.Surname = User.surname ?? "";
+		initialValues.Phone = User.phone ?? "";
+		initialValues.Email = User.email;
+		initialValues.UserName = User.userName ?? "";
+
+	}
+	else {
+
+		initialValues.Name = user.Name ?? "";
+		initialValues.Surname = user.Surname ?? "";
+		initialValues.Phone = user.Phone ?? "";
+		initialValues.UserName = user.UserName ?? "";
+		initialValues.Email = user.Email ?? "";
+	}
+
 
 
 
@@ -66,7 +66,7 @@ const Profile: React.FC<any> = () => {
 			Phone: data.get("Phone"),
 			Email: initialValues.Email
 		};
-		ChangeInfo(userVM, initialValues);
+		ChangeInfo(userVM, initialValues.Email === user.Email);
 	};
 	const handleSubmitPassword = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -109,7 +109,7 @@ const Profile: React.FC<any> = () => {
 						onSubmit={() => { }}
 						validationSchema={ProfileSchema}
 					>
-						{({ errors, touched, isSubmitting, isValid }) => (
+						{({ errors, touched, isSubmitting, isValid, dirty }) => (
 							<Box
 								onSubmit={handleSubmit}
 								style={{ width: "100%", height: "100%" }}
@@ -126,7 +126,7 @@ const Profile: React.FC<any> = () => {
 									label="UserName"
 									name="UserName"
 									autoComplete="login"
-									autoFocus
+
 								/>
 								{errors.UserName && touched.UserName ? (
 									<div style={{ color: "red" }}>{errors.UserName}</div>
@@ -140,7 +140,7 @@ const Profile: React.FC<any> = () => {
 									label="Name"
 									name="Name"
 									autoComplete="name"
-									autoFocus
+
 								/>
 								{errors.Name && touched.Name ? (
 									<div style={{ color: "red" }}>{errors.Name}</div>
@@ -154,7 +154,7 @@ const Profile: React.FC<any> = () => {
 									label="Surname"
 									name="Surname"
 									autoComplete="surname"
-									autoFocus
+
 								/>
 
 								{errors.Surname && touched.Surname ? (
@@ -169,7 +169,7 @@ const Profile: React.FC<any> = () => {
 									label="Phone"
 									name="Phone"
 									autoComplete="login"
-									autoFocus
+
 								/>
 								{errors.Phone && touched.Phone ? (
 									<div style={{ color: "red" }}>{errors.Phone}</div>
@@ -177,7 +177,7 @@ const Profile: React.FC<any> = () => {
 
 
 								<Button
-									disabled={!isValid}
+									disabled={!(isValid && dirty)}
 									type="submit"
 									fullWidth
 									variant="contained"
@@ -194,7 +194,7 @@ const Profile: React.FC<any> = () => {
 						onSubmit={() => { }}
 						validationSchema={PasswordSchema}
 					>
-						{({ errors, touched, isSubmitting, isValid }) => (
+						{({ errors, touched, isSubmitting, isValid, dirty }) => (
 							<Box
 								onSubmit={handleSubmitPassword}
 								style={{ width: "100%", height: "100%" }}
@@ -246,9 +246,10 @@ const Profile: React.FC<any> = () => {
 									<div style={{ color: "red" }}>{errors.ConfirmNewPassword}</div>
 								) : null}
 								<Button
-									disabled={!isValid}
+									disabled={!(isValid && dirty)}
 									type="submit"
 									fullWidth
+
 									variant="contained"
 									sx={{ mt: 3, mb: 2 }}
 								>

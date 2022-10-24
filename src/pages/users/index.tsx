@@ -3,9 +3,9 @@ import { DataGrid, GridColDef, GridApi, GridCellValue } from "@mui/x-data-grid";
 import Loader from "../../components/loader";
 import { useActions } from "../../hooks/useActions";
 import { useTypedSelector } from "../../hooks/useTypedSelector";
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button, ButtonGroup, InputLabel, MenuItem, Select, SelectChangeEvent, TablePagination } from '@mui/material';
-import { UnblockUser } from '../../services/api-user-service';
+
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -98,15 +98,15 @@ const Users: React.FC<any> = () => {
 
       renderCell: (params) => {
 
-        const api: GridApi = params.api;
-        const isblocked = params.getValue(params.id, api.getColumn("isBlocked").field);
+
+        const isblocked = params.row.isBlocked;
         async function onClick(e: any) {
 
           e.stopPropagation(); // don't select this row after clicking
 
 
 
-          const email = params.getValue(params.id, api.getColumn("email").field);
+          const email = params.row.email;
 
           isblocked ? await UserUnblock(email) : await UserBlock(email);
           GetUsers(page, pageSize);
@@ -125,7 +125,7 @@ const Users: React.FC<any> = () => {
       renderCell: (params) => {
 
         const api: GridApi = params.api;
-        const email = params.getValue(params.id, api.getColumn("email").field);
+        const email = params.row.email;
 
 
         return <AlertDialogSlide email={email} />;
@@ -137,11 +137,6 @@ const Users: React.FC<any> = () => {
       sortable: false,
 
       renderCell: (params) => {
-
-        const api: GridApi = params.api;
-        const email = params.getValue(params.id, api.getColumn("email").field);
-
-
         return (<Button><Link to={`/dashboard/profile`} state={{ User: params.row }}>Edit</Link> </Button>);
 
       }
@@ -163,14 +158,6 @@ const Users: React.FC<any> = () => {
   return (
     <div style={{ height: "80vh", width: "100%" }}>
       <DataGrid
-
-
-
-
-
-
-
-
         hideFooter={true}
 
         rows={rows}

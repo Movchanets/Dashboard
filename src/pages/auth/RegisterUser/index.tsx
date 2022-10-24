@@ -96,7 +96,7 @@ const RegisterUser: React.FC = () => {
 						onSubmit={() => { }}
 						validationSchema={RegisterSchema}
 					>
-						{({ errors, touched, isSubmitting, isValid }) => (
+						{({ errors, touched, isSubmitting, isValid, dirty }) => (
 							<Box
 								onSubmit={handleSubmit}
 								style={{ width: "100%", height: "100%" }}
@@ -161,7 +161,7 @@ const RegisterUser: React.FC = () => {
 								</Select>
 
 								<Button
-									disabled={!isValid}
+									disabled={!(isValid && dirty)}
 									type="submit"
 									fullWidth
 									variant="contained"

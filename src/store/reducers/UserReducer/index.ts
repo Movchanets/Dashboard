@@ -22,22 +22,18 @@ const UserReducer = (state = initialState, action: UserActions): UserState => {
         user: action.payload.decodedToken,
         message: action.payload.message,
       };
+    case UserActionTypes.ERROR_MSG:
+      return { ...state, loading: false, message: action.payload.message };
+    case UserActionTypes.GETROLES_SUCCESS:
+      return { ...state, message: action.payload.message, roles: action.payload.payload, loading: false };
 
     case UserActionTypes.GETROLES_SUCCESS:
       return { ...state, message: action.payload.message, roles: action.payload.payload, loading: false };
-    case UserActionTypes.GETROLES_ERROR:
-      return { ...state, message: action.payload.message };
-    case UserActionTypes.GETROLES_SUCCESS:
-      return { ...state, message: action.payload.message, roles: action.payload.payload, loading: false };
-    case UserActionTypes.GETROLES_ERROR:
-      return { ...state, message: action.payload.message };
-    case UserActionTypes.LOGIN_USER_ERROR:
-      return { ...state, loading: false, message: action.payload.message }
-    case UserActionTypes.TOKEN_UPDATE_ERROR:
-      return { ...state, loading: false, message: action.payload.message }
-
     case UserActionTypes.SERVER_USER_ERROR:
       return { ...state, loading: false, message: action.payload.message };
+
+
+
     case UserActionTypes.LOGOUT_USER:
       return {
         isAuth: false,
@@ -50,36 +46,27 @@ const UserReducer = (state = initialState, action: UserActions): UserState => {
       };
     case UserActionTypes.DELETE_USER_SUCCESS:
       return { ...state, loading: false, message: action.payload };
-    case UserActionTypes.DELETE_USER_ERROR:
-      return { ...state, loading: false, message: action.payload };
-    case UserActionTypes.LOG_OUT_ERROR:
-      return { ...state, loading: false, message: action.payload };
-    case UserActionTypes.UNBLOCK_USER_ERROR:
-      return { ...state, loading: false, message: action.payload };
+
+
     case UserActionTypes.UNBLOCK_USER_SUCCESS:
       return { ...state, loading: false, message: action.payload };
-    case UserActionTypes.BLOCK_USER_ERROR:
-      return { ...state, loading: false, message: action.payload };
+
     case UserActionTypes.BLOCK_USER_SUCCESS:
       return { ...state, loading: false, message: action.payload };
     case UserActionTypes.PASSWORD_CHANGE_SUCCESS:
       return { ...state, loading: false, message: action.payload };
-    case UserActionTypes.PASSWORD_CHANGE_ERROR:
-      return { ...state, loading: false, message: action.payload };
+
     case UserActionTypes.REGISTER_SUCCESS:
       return { ...state, loading: false, message: action.payload };
-    case UserActionTypes.REGISTER_ERROR:
-      return { ...state, loading: false, message: action.payload.message };
+
     case UserActionTypes.UPDATE_USER:
       return { ...state, loading: false, user: action.payload }
     case UserActionTypes.CHANGE_SUCCESS:
       return { ...state, loading: false, message: action.payload.message };
-    case UserActionTypes.CHANGE_ERROR:
-      return { ...state, loading: false, message: action.payload.message };
+
     case UserActionTypes.FORGOT_USER_PASSWORD_SUCCESS:
       return { ...state, loading: false, message: action.payload.message };
-    case UserActionTypes.FORGOT_USER_PASSWORD_ERROR:
-      return { ...state, loading: false, message: action.payload.message };
+
     case UserActionTypes.ALL_USERS_LOADED:
       return { ...state, loading: false, message: action.payload.message, allUsers: action.payload.payload }
     default:

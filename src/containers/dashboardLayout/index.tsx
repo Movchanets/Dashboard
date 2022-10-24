@@ -180,12 +180,12 @@ const DashboardLayout: React.FC = () => {
                 ? theme.palette.grey[100]
                 : theme.palette.grey[900],
             flexGrow: 1,
-            height: "100vh",
+            height: "100%",
             overflow: "auto",
           }}
         >
           <Toolbar />
-          <Box sx={{ width: "100%", height: "100vh" }}>
+          <Box sx={{ width: "100%", height: "90vh" }}>
             <Box component="main" sx={{ width: "100%", display: "flex" }}>
               <Box
                 sx={{

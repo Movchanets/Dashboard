@@ -8,9 +8,8 @@ import {
 import jwtDecode from "jwt-decode";
 import {
   setAccessToken,
-  setRefreshToken,
-  getAccessToken,
-  getrefreshToken
+  setRefreshToken
+
 } from "../../../services/api-user-service";
 
 
@@ -22,7 +21,7 @@ export const LoginUser = (user: any) => {
       const { response } = data;
       if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.LOGIN_USER_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: data.response.message,
         });
         toast.error(response.message);
@@ -50,7 +49,7 @@ export const ForgotPassword = (email: string) => {
       const { response } = data;
       if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.FORGOT_USER_PASSWORD_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: data.response,
         });
         toast.error(response.message);
@@ -83,7 +82,7 @@ export const LogOut = (email: string) => {
         toast("Logout Success");
       }
       else {
-        dispatch({ type: UserActionTypes.LOG_OUT_ERROR, payload: "Log_Out Error" });
+        dispatch({ type: UserActionTypes.ERROR_MSG, payload: "Log_Out Error" });
       }
     } catch (error) {
       dispatch({
@@ -125,7 +124,7 @@ export const UserDelete = (email: string) => {
       }
       else {
         dispatch({
-          type: UserActionTypes.DELETE_USER_SUCCESS,
+          type: UserActionTypes.ERROR_MSG,
           payload: "User Deleted error",
         });
       }
@@ -152,7 +151,7 @@ export const UserBlock = (email: string) => {
       }
       else {
         dispatch({
-          type: UserActionTypes.BLOCK_USER_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: "Unknown error",
         });
       }
@@ -180,7 +179,7 @@ export const UserUnblock = (email: string) => {
       }
       else {
         dispatch({
-          type: UserActionTypes.UNBLOCK_USER_SUCCESS,
+          type: UserActionTypes.ERROR_MSG,
           payload: "Unblock user error",
         });
       }
@@ -224,7 +223,7 @@ export const ChangePassword = (passwordchange: any) => {
 
       if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.PASSWORD_CHANGE_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: data.response.message,
         });
         toast.error(response.message);
@@ -247,7 +246,7 @@ export const ChangePassword = (passwordchange: any) => {
     }
   };
 };
-export const ChangeInfo = (Info: any, user: any) => {
+export const ChangeInfo = (Info: any, IsMyProfile: boolean) => {
   return async (dispatch: Dispatch<UserActions>) => {
     try {
       dispatch({ type: UserActionTypes.START_REQUEST });
@@ -258,7 +257,7 @@ export const ChangeInfo = (Info: any, user: any) => {
 
       if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.CHANGE_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: data.response.message,
         });
         toast.error(response.message);
@@ -269,12 +268,14 @@ export const ChangeInfo = (Info: any, user: any) => {
           payload: data.response,
 
         });
+        if (IsMyProfile) {
+          const { accessToken, refreshToken, message } = data.response;
 
-        const { accessToken, refreshToken, message } = data.response;
+          setAccessToken(accessToken);
+          setRefreshToken(refreshToken);
+          AuthUser(accessToken, message, dispatch);
 
-        setAccessToken(accessToken);
-        setRefreshToken(refreshToken);
-        AuthUser(accessToken, message, dispatch);
+        }
         toast(data.response.message);
       }
     } catch (e) {
@@ -303,7 +304,7 @@ export const registerUser = (user: any) => {
 
       if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.REGISTER_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: data.response.message,
         });
         toast.error(response.message);
@@ -331,7 +332,7 @@ export const GetRoles = () => {
       const { response } = data;
       if (!response.isSuccess) {
         dispatch({
-          type: UserActionTypes.GETROLES_ERROR,
+          type: UserActionTypes.ERROR_MSG,
           payload: data.response.message,
         });
         toast.error(response.message);

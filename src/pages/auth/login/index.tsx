@@ -82,7 +82,7 @@ const Login: React.FC = () => {
             onSubmit={() => { }}
             validationSchema={LoginSchema}
           >
-            {({ errors, touched, isSubmitting, isValid }) => (
+            {({ errors, touched, isSubmitting, isValid, dirty }) => (
               <Box
                 onSubmit={handleSubmit}
                 style={{ width: "100%", height: "326px" }}
@@ -124,7 +124,7 @@ const Login: React.FC = () => {
                   name="rememberMe"
                 />
                 <Button
-                  disabled={!isValid}
+                  disabled={!(isValid && dirty)}
                   type="submit"
                   fullWidth
                   variant="contained"
