@@ -1,5 +1,5 @@
-# Dashboard
-master branch - backend
-current branch - frontend
-change database connection to start
-use update-database
+# Dashboard\n
+master branch - backend\n
+fronend branch - frontend\n
+change database connection to start\n
+use update-database\n
