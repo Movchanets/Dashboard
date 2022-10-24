@@ -62,6 +62,7 @@ namespace Dashboard.API.Infrastructure.Services
 			services.AddIdentity<AppUser, IdentityRole>(options =>
 			{
 				options.SignIn.RequireConfirmedAccount = true;
+			
 				options.Lockout.MaxFailedAccessAttempts = 5;
 				options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 				options.Password.RequireDigit = true;
