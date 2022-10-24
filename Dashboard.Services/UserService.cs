@@ -4,21 +4,9 @@ using Dashboard.Data.Data.Models;
 using Dashboard.Data.Data.Models.ViewModels;
 using Dashboard.Data.Data.ViewModels;
 using Dashboard.Data.Validation;
-using FluentValidation;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 
 namespace Dashboard.Services
 {
@@ -104,13 +92,16 @@ namespace Dashboard.Services
                     
                 };
             }
-            if(!(await _userRepository.CanUserSignIn(user))) 
-            {
-                return new ServiceResponse { Message = "You cannot login now, account is blocked" ,IsSuccess = false};
-            }
+			if (!(await _userRepository.CanUserSignIn(user)))
+			{
+				return new ServiceResponse { Message = "You cannot login now", IsSuccess = false };
+			}
+			
+
+		
             var result = await _userRepository.LoginUserAsync(user,model.RememberMe, model.Password);
             if (result.Succeeded) 
-            {
+            { 
             
             var tokens = await _jwtService.GenerateJwtTokenAsync(user);
 
@@ -125,11 +116,13 @@ namespace Dashboard.Services
 			}
             else 
             {
-                
-                return _userRepository.IsUserLockedAsync(user).Result ?new ServiceResponse
-                { Message = "User locked, try again in 5 minutes", IsSuccess = false }
-                : new ServiceResponse { Message = "Wrong password", IsSuccess = false };
-            }
+            return     result.IsLockedOut ? new ServiceResponse
+			{ Message = "User locked, try again in 5 minutes", IsSuccess = false }:
+
+				 new ServiceResponse { Message = "Wrong password", IsSuccess = false };
+
+
+			}
 		}
 
 		public async Task<ServiceResponse> GetUsersAsync(int pageNumber, int pageSize)

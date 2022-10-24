@@ -50,8 +50,6 @@ var logger = new LoggerConfiguration()
 		.CreateLogger();
 
 
-builder.Logging.ClearProviders();
-
 
 builder.Logging.AddSerilog(logger);
 builder.Services.AddAuthentication(options => {

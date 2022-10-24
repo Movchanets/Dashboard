@@ -1,19 +1,14 @@
-﻿using Dashboard.Data.Data.Models;
-using Dashboard.Data.Data.Models.ViewModels;
+﻿using Dashboard.Data.Data.Models.ViewModels;
 using Dashboard.Data.Data.ViewModels;
 using Dashboard.Data.Validation;
 using Dashboard.Services;
-using FluentValidation;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dashboard.API.Controllers
 {
-	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	[Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
