@@ -5,14 +5,13 @@ using Dashboard.Data.Data.Context;
 using Dashboard.Data.Initializer;
 using Dashboard.Services.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add dababase context
+// Add database context
 builder.Services.AddDbContext<AppDbContext>();
 
 // Add AutoMapper configuration 
@@ -52,6 +51,7 @@ var logger = new LoggerConfiguration()
 
 
 builder.Logging.AddSerilog(logger);
+
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
