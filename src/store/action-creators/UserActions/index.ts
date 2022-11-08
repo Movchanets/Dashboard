@@ -3,14 +3,10 @@ import { Dispatch } from "redux";
 import { toast } from "react-toastify";
 import {
   login, RegisterUser, changeInfo, GetAllRoles, forgotPassword, changePassword,
-  removeTokens, getUsers, BlockUser, UnblockUser, Log_Out, DeleteUser,
+  removeTokens, getUsers, BlockUser, UnblockUser, Log_Out, DeleteUser, setAccessToken,
+  setRefreshToken
 } from "../../../services/api-user-service";
 import jwtDecode from "jwt-decode";
-import {
-  setAccessToken,
-  setRefreshToken
-
-} from "../../../services/api-user-service";
 
 
 export const LoginUser = (user: any) => {
