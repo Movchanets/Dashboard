@@ -24,6 +24,8 @@ const UserReducer = (state = initialState, action: UserActions): UserState => {
       };
     case UserActionTypes.ERROR_MSG:
       return { ...state, loading: false, message: action.payload.message };
+    case UserActionTypes.SERVER_USER_ERROR:
+      return { ...state, loading: false, message: action.payload.message };
     case UserActionTypes.GETROLES_SUCCESS:
       return { ...state, message: action.payload.message, roles: action.payload.payload, loading: false };
 
