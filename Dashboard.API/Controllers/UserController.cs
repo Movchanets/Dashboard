@@ -14,7 +14,7 @@ namespace Dashboard.API.Controllers
     public class UserController : ControllerBase
     {
 		private readonly ILogger<UserController> _logger;
-		private UserService _userService;
+		private readonly UserService _userService;
         public UserController(UserService userService, ILogger<UserController> logger)
         {
             _userService = userService;
@@ -46,7 +46,7 @@ namespace Dashboard.API.Controllers
         public async Task<IActionResult> LoginUserAsync([FromBody] LoginUserVM model)
         {
             var validator = new LoginUserValidation();
-            var validationResult = validator.Validate(model);
+            var validationResult = await validator.ValidateAsync(model);
             if (validationResult.IsValid)
             {
                 var result = await _userService.LoginUserAsync(model);

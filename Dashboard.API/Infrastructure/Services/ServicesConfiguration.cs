@@ -15,6 +15,7 @@ namespace Dashboard.API.Infrastructure.Services
         {
 			// Add user service
 			services.AddTransient<UserService>();
+			services.AddTransient<BlogService>();
 
 			// Add email service
 			services.AddTransient<EmailService>();
